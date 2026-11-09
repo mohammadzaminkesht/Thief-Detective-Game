@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101b2b">
+  <title>Thief & Detective | بازی دزد و کارآگاه</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="is-loading">
+  <!-- Initial loading screen inspired by the original C++ loading() function -->
+  <section id="loadingScreen" class="loading-screen is-active" role="status" aria-live="polite" aria-label="در حال بارگذاری بازی">
+    <div class="loading-content">
+      <div class="loading-logo-wrap">
+        <img src="assets/logo.png" alt="Thief & Detective" class="loading-logo">
+      </div>
+      <p class="loading-eyebrow">THIEF &amp; DETECTIVE</p>
+      <h1 class="loading-title">در حال آماده‌سازی بازی</h1>
+      <p class="loading-description">شهر در انتظار شروع یک تعقیب تازه است...</p>
+      <div class="loading-progress-track" aria-hidden="true">
+        <span id="loadingProgressBar" class="loading-progress-fill"></span>
+      </div>
+      <div class="loading-meta">
+        <span id="loadingStatus">در حال بارگذاری...</span>
+        <strong id="loadingPercent">۰٪</strong>
+      </div>
+      <div class="loading-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
+  </section>
+
+  <div class="app-shell app-shell-preload">
+    <header class="topbar">
+      <a class="brand" href="#" id="brandHome" aria-label="بازگشت به منوی اصلی">
+        <img src="assets/logo.png" alt="Thief & Detective" class="brand-logo">
+      </a>
+      <div class="topbar-right">
+        <span class="version-pill">نسخه وب</span>
+        <button class="icon-button" id="topHelpBtn" aria-label="راهنما" title="راهنما">؟</button>
+      </div>
+    </header>
+
+    <main>
+      <!-- Main menu -->
+      <section id="menuScreen" class="screen menu-screen">
+        <div class="hero-card">
+          <div class="hero-art" aria-hidden="true">
+            <div class="moon"></div>
+            <div class="city-line city-back"></div>
+            <div class="city-line city-front"></div>
+            <div class="hero-house"><span>⌂</span><i></i></div>
+            <div class="hero-character thief-character">T</div>
+            <div class="hero-character detective-character">D</div>
+            <div class="hero-star star-one">✦</div>
+            <div class="hero-star star-two">✧</div>
+          </div>
+          <div class="hero-content">
+            <p class="eyebrow">یک بازی استراتژیک و حدس‌زدنی</p>
+            <h1>دزد را از دست کارآگاه نجات بده!</h1>
+            <p class="hero-description">بین خانه‌ها حرکت کن، از کمک‌دزد استفاده کن و قبل از اینکه کارآگاه مسیرت را پیدا کند، امتیاز بیشتری بگیر.</p>
+            <button class="primary-button large-button" id="startGameBtn"><span>شروع بازی</span><b>←</b></button>
+          </div>
+        </div>
+
+        <div class="menu-cards">
+          <button class="menu-card" id="tipsBtn">
+            <span class="menu-card-icon purple">☷</span>
+            <span><strong>راهنمای بازی</strong><small>قوانین و روش بازی</small></span>
+            <b>←</b>
+          </button>
+          <button class="menu-card" id="recordsBtn">
+            <span class="menu-card-icon amber">♛</span>
+            <span><strong>رکوردها</strong><small>سه امتیاز برتر شما</small></span>
+            <b>←</b>
+          </button>
+          <button class="menu-card" id="settingsBtn">
+            <span class="menu-card-icon teal">⚙</span>
+            <span><strong>تنظیمات</strong><small>صدا و سرعت حرکت</small></span>
+            <b>←</b>
+          </button>
+        </div>
+        <p class="menu-footer">ساخته‌شده با الهام از بازی اصلی C++</p>
+      </section>
+
+      <!-- Game screen -->
+      <section id="gameScreen" class="screen game-screen hidden">
+        <div class="game-heading">
+          <div>
+            <p class="eyebrow">شبی در شهر</p>
+            <h1>مراقب کارآگاه باش!</h1>
+            <p class="game-subtitle">با جابه‌جایی هوشمندانه مهره‌ها، دزد اصلی را از دید کارآگاه پنهان نگه دار.</p>
+          </div>
+          <div class="game-heading-actions">
+            <button class="subtle-button" id="gameQuickHelpBtn" type="button">راهنمای سریع <span>؟</span></button>
+            <button class="subtle-button" id="quitGameBtn">بازگشت به منو <span>↩</span></button>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card score-stat">
+            <span class="stat-icon">★</span>
+            <div><small>امتیاز فعلی</small><strong id="scoreValue">۰</strong></div>
+          </div>
+          <div class="stat-card turn-stat">
+            <span class="stat-icon">⟳</span>
+            <div><small>وضعیت بازی</small><strong id="turnStatus">نوبت شما</strong></div>
+          </div>
+          <div class="stat-card detective-stat">
+            <span class="stat-icon">◉</span>
+            <div><small>خانه کارآگاه</small><strong id="detectiveHomeValue">—</strong></div>
+          </div>
+        </div>
+
+        <section class="turn-guide" aria-label="راهنمای نوبت فعلی">
+          <div class="turn-guide-copy">
+            <span class="turn-guide-kicker">راهنمای نوبت</span>
+            <strong id="turnGuideTitle">۱. مهره را انتخاب کن</strong>
+            <p id="turnGuideDescription">یکی از دو مهره دزد را برای حرکت انتخاب کن.</p>
+          </div>
+          <ol class="turn-steps" aria-label="مراحل هر نوبت">
+            <li data-turn-step="1" class="is-current"><span>۱</span><small>انتخاب مهره</small></li>
+            <li data-turn-step="2"><span>۲</span><small>انتخاب خانه</small></li>
+            <li data-turn-step="3"><span>۳</span><small>حرکت کارآگاه</small></li>
+          </ol>
+        </section>
+
+        <div class="game-layout">
+          <section class="board-panel panel">
+            <div class="panel-heading board-heading">
+              <div><h2>نقشه محله</h2><p id="boardInstruction">بعد از انتخاب مهره، یکی از خانه‌های خالی را برای حرکت بزن.</p></div>
+              <span class="live-indicator"><i></i> در حال بازی</span>
+            </div>
+            <div class="board-frame">
+              <div class="board-sky"><span>✦</span><span>☾</span><span>✧</span><span>✦</span></div>
+              <div class="board-grid" id="boardGrid" aria-label="نقشه ده خانه"></div>
+              <div class="board-legend">
+                <span><i class="legend-dot main-thief-dot">T</i> دزد اصلی</span>
+                <span><i class="legend-dot helper-thief-dot">t</i> کمک‌دزد</span>
+                <span><i class="legend-dot detective-dot">D</i> کارآگاه</span>
+                <span><i class="legend-dot chance-dot">%</i> احتمال حرکت کارآگاه</span>
+                <span><i class="legend-dot eye-legend-dot">◉</i> چشم مراقب خیابان</span>
+              </div>
+            </div>
+            <div class="board-note" id="boardNote" role="status" aria-live="polite" aria-atomic="true">ابتدا یکی از مهره‌ها را انتخاب کن، سپس خانه مقصد را بزن.</div>
+            <div class="detective-preview hidden" id="detectivePreview" role="status" aria-live="assertive" aria-atomic="true">
+              <span class="detective-preview-icon" aria-hidden="true">⌖</span>
+              <span class="detective-preview-copy"><strong>مقصد کارآگاه: <b id="detectivePreviewHouse">خانه —</b></strong><small id="detectivePreviewProbability">احتمال انتخاب این خانه: —</small></span>
+              <span class="detective-preview-state">در انتظار حرکت</span>
+            </div>
+          </section>
+
+          <aside class="control-column">
+            <section class="panel control-panel" aria-labelledby="movePanelTitle">
+              <div class="panel-heading"><div><h2 id="movePanelTitle">انتخاب مهره</h2><p>یکی از مهره‌های فعال را برای حرکت انتخاب کن.</p></div><span class="step-number">۱</span></div>
+              <div class="character-select" id="characterSelect">
+                <button class="character-option" data-character="T" id="selectT">
+                  <span class="character-avatar avatar-T">T</span>
+                  <span><strong>دزد اصلی</strong><small>مهره T</small></span>
+                  <i class="selection-check">✓</i>
+                </button>
+                <button class="character-option" data-character="t" id="selectt">
+                  <span class="character-avatar avatar-t">t</span>
+                  <span><strong>کمک‌دزد</strong><small>مهره t</small></span>
+                  <i class="selection-check">✓</i>
+                </button>
+              </div>
+              <div class="destination-instruction"><span class="step-number">۲</span><span>بعد از انتخاب مهره، یک خانه خالی روی نقشه انتخاب کن.</span></div>
+              <button class="skip-button" id="skipTurnBtn" type="button">رد کردن این نوبت <span>⤼</span></button>
+              <p class="validation-message" id="validationMessage" role="status" aria-live="polite" aria-atomic="true">خانه‌های خالی پس از انتخاب مهره قابل انتخاب می‌شوند.</p>
+            </section>
+
+            <section class="panel probability-panel" aria-labelledby="probabilityTitle">
+              <div class="panel-heading"><div><h2 id="probabilityTitle">پیش‌بینی حرکت کارآگاه</h2><p>مقصدهای احتمالی حرکت بعدی</p></div><span class="probability-icon" aria-hidden="true">⌁</span></div>
+              <p class="probability-explainer">این درصدها شانس انتخاب هر خانه توسط کارآگاه هستند، نه محدودیت حرکت تو. چشم خیابان می‌تواند پس از انتخاب تو این درصدها را اصلاح کند.</p>
+              <div class="probability-update-banner" id="probabilityUpdateBanner" role="status" aria-live="polite" hidden></div>
+              <p class="probability-context" id="probabilityContext" aria-live="polite">احتمال‌های پایه بر اساس موقعیت مهره‌ها محاسبه شده‌اند.</p>
+              <details class="probability-details" id="probabilityDetails" open>
+                <summary>نمایش احتمال خانه‌ها</summary>
+                <div id="probabilityList" class="probability-list"><p class="muted-text">در حال محاسبه مسیرهای احتمالی…</p></div>
+              </details>
+              <div class="eye-status" id="eyeStatus" aria-live="polite"><span class="eye-status-icon" aria-hidden="true">◉</span><span class="eye-status-copy"><strong>چشم فعلاً دیده نمی‌شود</strong><span>شانس ظاهرشدن در نوبت بعد: ۰٪</span></span></div>
+            </section>
+          </aside>
+        </div>
+
+        <div class="game-bottom-bar">
+          <span>هدف: تا جای ممکن از دزد اصلی محافظت کن.</span>
+          <button class="text-button" id="gameTipsBtn">مشاهده قوانین بازی</button>
+        </div>
+      </section>
+
+      <!-- Records -->
+      <section id="recordsScreen" class="screen simple-screen hidden">
+        <div class="simple-header"><button class="back-button" data-back>→</button><div><p class="eyebrow">بهترین عملکردها</p><h1>رکوردهای من</h1></div></div>
+        <div class="panel records-panel">
+          <div class="record-crown">♛</div>
+          <p class="records-intro">سه امتیاز برتر بازی‌های انجام‌شده در همین مرورگر</p>
+          <div id="recordsSummary" class="records-summary" aria-live="polite"></div>
+          <div id="recordsList" class="records-list"></div>
+          <button class="danger-link" id="clearRecordsBtn">پاک کردن رکوردها</button>
+        </div>
+      </section>
+
+      <!-- Tips -->
+      <section id="tipsScreen" class="screen simple-screen hidden">
+        <div class="simple-header"><button class="back-button" data-back>→</button><div><p class="eyebrow">قبل از شروع بخوان</p><h1>راهنمای بازی</h1></div></div>
+        <div class="panel tips-panel">
+          <div class="tip-item"><span class="tip-number">۱</span><div><h3>شخصیت‌ها</h3><p><b>T</b> دزد اصلی است و اگر کارآگاه به خانه او برسد بازی تمام می‌شود. <b>t</b> کمک‌دزد است و می‌تواند به‌عنوان مهره دوم حرکت کند. <b>D</b> کارآگاه است و با توجه به احتمال‌ها تصمیم می‌گیرد.</p></div></div>
+          <div class="tip-item"><span class="tip-number">۲</span><div><h3>حرکت دادن مهره‌ها</h3><p>در هر نوبت یکی از مهره‌های مجاز را انتخاب کن و سپس یک خانه خالی را بزن. خانه دزد دیگر و خانه فعلی کارآگاه قابل انتخاب نیستند. با «رد کردن حرکت» می‌توانی بدون جابه‌جایی مهره، نوبت را بگذرانی.</p></div></div>
+          <div class="tip-item"><span class="tip-number">۳</span><div><h3>حدس کارآگاه</h3><p>بخش «حدس کارآگاه» خانه‌هایی را نشان می‌دهد که کارآگاه ممکن است به آن‌ها برود. درصدها احتمال انتخاب هر خانه را نمایش می‌دهند؛ این‌ها مسیرهای احتمالی هوش مصنوعی هستند، نه محدودیت حرکت شما.</p></div></div>
+          <div class="tip-item"><span class="tip-number">۴</span><div><h3>چشم مراقب خیابان</h3><p>چشم در بعضی نوبت‌ها در کنار خیابان ظاهر می‌شود و فقط خانه‌های زوج یا فرد را زیر نظر می‌گیرد. اگر خانه‌ای که انتخاب می‌کنی با الگوی چشم هم‌خوان باشد، کارآگاه مستقیماً خانه فعلی دزد اصلی را هدف می‌گیرد. اگر خانه جدید هم‌الگو نباشد اما خانه قبلی دزد اصلی زیر نظر چشم بوده باشد، گزینه‌های هم‌الگو از حدس کارآگاه حذف و احتمال گزینه‌های باقی‌مانده دوباره محاسبه می‌شود.</p></div></div>
+          <div class="tip-item"><span class="tip-number">۵</span><div><h3>امتیاز و پایان بازی</h3><p>هر بار که کارآگاه حرکت می‌کند، یک امتیاز می‌گیری. اگر کارآگاه به خانه دزد اصلی برسد، بازی تمام می‌شود و امتیاز تو در صورت قرار گرفتن بین سه رکورد برتر ذخیره خواهد شد. آمار تعداد بازی‌ها و میانگین امتیاز نیز در همین مرورگر نگهداری می‌شود.</p></div></div>
+          <div class="source-note">یادداشت تبدیل: در کد اجرایی C++ ارسالی، منطق حرکتی مستقلی برای نگهبان وجود نداشت؛ بنابراین نسخه وب بر اساس رفتار اجرایی، سه مهره T، t و D دارد. در نسخه وب، کارآگاه نیز طبق تصمیم طراحی جدید وارد خانه مقصد می‌شود.</div>
+        </div>
+      </section>
+
+      <!-- Settings -->
+      <section id="settingsScreen" class="screen simple-screen hidden">
+        <div class="simple-header"><button class="back-button" data-back>→</button><div><p class="eyebrow">تجربه بازی</p><h1>تنظیمات</h1></div></div>
+        <div class="panel settings-panel">
+          <div class="setting-row"><div><strong>افکت صوتی</strong><small>صدای کوتاه هنگام حرکت مهره‌ها</small></div><label class="switch"><input type="checkbox" id="soundToggle" checked><span></span></label></div>
+          <div class="setting-row"><div><strong>سرعت انیمیشن</strong><small>مدت حرکت کامل کاراکترها؛ سریع ۲٫۵، معمولی ۵ و آرام ۷٫۵ ثانیه</small></div><select id="speedSelect"><option value="fast">سریع</option><option value="normal" selected>معمولی</option><option value="slow">آرام</option></select></div>
+          <div class="setting-row"><div><strong>کاهش حرکت‌های بصری</strong><small>برای افرادی که انیمیشن طولانی برایشان آزاردهنده است</small></div><label class="switch"><input type="checkbox" id="reduceMotionToggle"><span></span></label></div>
+          <p id="settingsSaveStatus" class="settings-save-status" aria-live="polite">تنظیمات به‌صورت خودکار ذخیره می‌شوند.</p>
+          <button class="primary-button" data-back>بازگشت</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer"><span>Thief & Detective</span><span>یک بازسازی وب از پروژه C++</span></footer>
+  </div>
+
+  <!-- First-run onboarding -->
+  <div class="modal-backdrop hidden" id="onboardingModal" role="dialog" aria-modal="true" aria-labelledby="onboardingTitle" aria-describedby="onboardingDescription">
+    <div class="modal-card onboarding-card">
+      <div class="onboarding-topline"><span class="eyebrow">راهنمای شروع</span><span id="onboardingCounter">۱ از ۳</span></div>
+      <div class="onboarding-illustration" aria-hidden="true"><span class="onboarding-house">⌂</span><span class="onboarding-piece onboarding-thief">T</span><span class="onboarding-piece onboarding-detective">D</span></div>
+      <h2 id="onboardingTitle">هدف بازی چیست؟</h2>
+      <p id="onboardingDescription">دزد اصلی را از کارآگاه پنهان نگه دار. هرچه مدت بیشتری دوام بیاوری، امتیاز بیشتری می‌گیری.</p>
+      <div class="onboarding-progress" aria-label="پیشرفت راهنما"><span class="is-active"></span><span></span><span></span></div>
+      <div class="onboarding-actions">
+        <button class="secondary-button" id="onboardingSkipBtn" type="button">رد کردن راهنما</button>
+        <button class="primary-button" id="onboardingNextBtn" type="button">بعدی</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game over dialog -->
+  <div class="modal-backdrop hidden" id="gameOverModal" role="dialog" aria-modal="true" aria-labelledby="gameOverTitle">
+    <div class="modal-card game-over-card">
+      <div class="modal-symbol">⌖</div>
+      <p class="eyebrow">پایان بازی</p>
+      <h2 id="gameOverTitle">کارآگاه دزد را پیدا کرد!</h2>
+      <p>این بار کارآگاه به مخفیگاه دزد اصلی رسید.</p>
+      <div class="final-score"><small>امتیاز نهایی</small><strong id="finalScoreValue">۰</strong></div>
+      <div class="result-stats" aria-label="خلاصه عملکرد">
+        <div><small>حرکت‌های کارآگاه</small><strong id="finalTurnsValue">۰</strong></div>
+        <div><small>بهترین امتیاز شما</small><strong id="finalBestScoreValue">۰</strong></div>
+        <div><small>تعداد بازی‌ها</small><strong id="finalGamesValue">۰</strong></div>
+      </div>
+      <p id="recordMessage" class="record-message" role="status" aria-live="polite"></p>
+      <div class="modal-actions"><button class="primary-button" id="playAgainBtn">بازی مجدد</button><button class="secondary-button" id="modalMenuBtn">منوی اصلی</button></div>
+    </div>
+  </div>
+
+  <!-- Small information modal -->
+  <div class="modal-backdrop hidden" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
+    <div class="modal-card info-card">
+      <button class="modal-close" id="closeInfoModal" aria-label="بستن">×</button>
+      <p class="eyebrow">راهنمای سریع</p>
+      <h2 id="infoTitle">چطور بازی کنم؟</h2>
+      <p>یک مهره فعال را انتخاب کن و بعد روی خانه خالی بزن. کارآگاه پس از حرکت تو جابه‌جا می‌شود. درصدهای بخش پیش‌بینی فقط احتمال مقصد کارآگاه را نشان می‌دهند، نه محدودیت حرکت تو. اگر چشم مراقب در خیابان ظاهر شد، زوج یا فرد بودن خانه‌ها را بررسی کن؛ چشم می‌تواند احتمال‌های کارآگاه را تغییر دهد. مراقب دزد اصلی (T) باش!</p>
+      <button class="primary-button" id="gotItBtn">متوجه شدم</button>
+    </div>
+  </div>
+
+  <script src="game-core.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
