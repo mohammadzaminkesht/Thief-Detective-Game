@@ -262,6 +262,17 @@
     </div>
   </div>
 
+  <!-- Portrait guard: the play screen is designed for landscape phones. -->
+  <section id="orientationPrompt" class="orientation-prompt" role="dialog" aria-modal="true" aria-labelledby="orientationTitle" aria-describedby="orientationDescription">
+    <div class="orientation-card">
+      <div class="orientation-phone" aria-hidden="true"><span></span></div>
+      <p class="eyebrow">حالت مناسب بازی</p>
+      <h2 id="orientationTitle">گوشی را افقی کن</h2>
+      <p id="orientationDescription">برای دیدن نقشه، مهره‌ها، کنترل‌ها و احتمال‌ها در یک صفحه، گوشی را به حالت افقی بچرخان.</p>
+      <button class="primary-button" id="orientationRetryBtn" type="button">بررسی دوباره</button>
+    </div>
+  </section>
+
   <!-- Small information modal -->
   <div class="modal-backdrop hidden" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">
     <div class="modal-card info-card">

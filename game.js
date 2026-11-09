@@ -149,6 +149,7 @@ function showScreen(name) {
   });
 
   state.screen = name;
+  document.body.classList.toggle('is-playing', name === 'game');
   window.scrollTo({ top: 0, behavior: state.reduceMotion ? 'auto' : 'smooth' });
 
   if (name === 'game') {
@@ -264,7 +265,9 @@ function getAvailableCharacters() {
 }
 
 function scrollToMobileTarget(selector) {
-  if (!window.matchMedia('(max-width: 640px)').matches) return;
+  // The mobile game now uses a single landscape viewport; never scroll the
+  // board or controls into view because doing so would break the one-screen layout.
+  if (state.screen === 'game' || !window.matchMedia('(max-width: 640px)').matches) return;
   const target = document.querySelector(selector);
   if (!target) return;
   window.setTimeout(() => {
@@ -898,7 +901,23 @@ function finishOnboarding() {
   beginGameNow();
 }
 
+function requestLandscapeOrientation() {
+  const compactDevice = window.matchMedia('(max-width: 900px)').matches;
+  const orientation = window.screen?.orientation;
+  if (!compactDevice || !orientation || typeof orientation.lock !== 'function') return;
+
+  // Orientation locking is supported only by some mobile browsers and may
+  // require fullscreen. The on-screen rotate prompt remains the fallback.
+  try {
+    const lockRequest = orientation.lock('landscape');
+    if (lockRequest && typeof lockRequest.catch === 'function') lockRequest.catch(() => undefined);
+  } catch (error) {
+    // A denied/unsupported lock must never block starting the game.
+  }
+}
+
 function beginGameNow() {
+  requestLandscapeOrientation();
   state.score = 0;
   state.statusT = 0;
   state.statusSmallT = 0;
@@ -1253,6 +1272,7 @@ function clearAllRecords() {
 
 // Navigation and buttons
 $('#startGameBtn').addEventListener('click', startGame);
+$('#orientationRetryBtn')?.addEventListener('click', requestLandscapeOrientation);
 $('#tipsBtn').addEventListener('click', () => openTips('menu'));
 $('#gameTipsBtn').addEventListener('click', () => openTips('game'));
 $('#recordsBtn').addEventListener('click', () => {
@@ -1421,6 +1441,20 @@ state.records = getRecords();
 state.stats = getGameStats();
 applySettingsToUI();
 const probabilityDetails = $('#probabilityDetails');
-if (probabilityDetails && window.matchMedia('(max-width: 640px)').matches) probabilityDetails.open = false;
+function syncProbabilityDetailsForViewport() {
+  const compactLandscape = window.matchMedia('(orientation: landscape) and (max-height: 620px)').matches;
+  if (probabilityDetails && compactLandscape) probabilityDetails.open = true;
+}
+if (probabilityDetails) {
+  const compactLandscape = window.matchMedia('(orientation: landscape) and (max-height: 620px)').matches;
+  probabilityDetails.open = compactLandscape || !window.matchMedia('(max-width: 640px)').matches;
+}
+window.addEventListener('orientationchange', () => window.setTimeout(syncProbabilityDetailsForViewport, 80), { passive: true });
+const landscapeViewportQuery = window.matchMedia('(orientation: landscape) and (max-height: 620px)');
+if (typeof landscapeViewportQuery.addEventListener === 'function') {
+  landscapeViewportQuery.addEventListener('change', syncProbabilityDetailsForViewport);
+} else if (typeof landscapeViewportQuery.addListener === 'function') {
+  landscapeViewportQuery.addListener(syncProbabilityDetailsForViewport);
+}
 showScreen('menu');
 startInitialLoading();

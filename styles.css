@@ -1510,3 +1510,244 @@ html.reduce-motion-ui .probability-update-banner.is-no-motion {
   opacity: 1;
   transform: none;
 }
+
+
+/* =========================================================
+   Mobile landscape play mode
+   - Ask phone users to rotate before entering the board.
+   - Keep the complete game UI inside one landscape viewport.
+   ========================================================= */
+.orientation-prompt {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  place-items: center;
+  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
+  background: radial-gradient(circle at 50% 25%, rgba(62, 111, 136, .22), transparent 48%), rgba(7, 15, 27, .97);
+  text-align: center;
+}
+.orientation-card {
+  width: min(360px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 9px;
+  padding: 25px 22px;
+  border: 1px solid rgba(153, 190, 212, .16);
+  border-radius: 22px;
+  background: linear-gradient(145deg, rgba(27, 48, 72, .98), rgba(15, 29, 47, .98));
+  box-shadow: var(--shadow);
+}
+.orientation-card .eyebrow { margin: 7px 0 0; }
+.orientation-card h2 { margin: 0; font-size: 20px; }
+.orientation-card p:not(.eyebrow) { margin: 0 0 8px; color: #a9bbcd; font-size: 11px; line-height: 2; }
+.orientation-card .primary-button { min-height: 42px; padding-inline: 24px; }
+.orientation-phone {
+  position: relative;
+  width: 76px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  border: 4px solid #8fa7bd;
+  border-radius: 15px;
+  background: linear-gradient(145deg, #213b55, #102033);
+  box-shadow: 0 0 0 7px rgba(112, 169, 255, .07);
+  animation: phone-rotate-hint 2.2s ease-in-out infinite;
+}
+.orientation-phone::before {
+  content: '';
+  width: 36px;
+  height: 65px;
+  border: 1px solid rgba(169, 199, 219, .4);
+  border-radius: 5px;
+  background: linear-gradient(160deg, rgba(78, 208, 181, .22), rgba(112, 169, 255, .12));
+}
+.orientation-phone span {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  margin-top: 92px;
+  border-radius: 50%;
+  background: #8fa7bd;
+}
+@keyframes phone-rotate-hint {
+  0%, 18%, 100% { transform: rotate(0deg); }
+  42%, 75% { transform: rotate(90deg); }
+}
+
+@media (max-width: 900px) and (orientation: portrait) {
+  body.is-playing { overflow: hidden; }
+  body.is-playing #orientationPrompt { display: grid; }
+  body.is-playing .app-shell { pointer-events: none; filter: blur(2px); }
+}
+
+@media (orientation: landscape) and (min-width: 520px) and (max-height: 620px) {
+  body.is-playing { width: 100%; height: 100dvh; min-width: 0; min-height: 100dvh; overflow: hidden; padding: 0; }
+  body.is-playing #orientationPrompt { display: none; }
+
+  body.is-playing .app-shell {
+    width: 100%; max-width: none; height: 100dvh; min-height: 0; margin: 0;
+    padding: max(2px, env(safe-area-inset-top)) max(7px, env(safe-area-inset-right)) max(2px, env(safe-area-inset-bottom)) max(7px, env(safe-area-inset-left));
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  body.is-playing .topbar { height: 32px; min-height: 32px; flex: 0 0 32px; border-bottom-color: rgba(189, 211, 235, .08); }
+  body.is-playing .brand-logo { width: 82px; height: 31px; object-position: left center; }
+  body.is-playing .version-pill { display: none; }
+  body.is-playing .topbar-right { gap: 5px; }
+  body.is-playing .icon-button { width: 27px; height: 27px; border-radius: 8px; font-size: 12px; }
+  body.is-playing main { flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  body.is-playing .footer { display: none; }
+
+  #gameScreen:not(.hidden) {
+    height: 100%; min-height: 0; max-height: 100%; display: flex; flex-direction: column;
+    gap: 0; overflow: hidden; padding: 3px 0 2px; animation: none;
+  }
+  .game-heading { flex: 0 0 26px; min-height: 26px; margin: 0 0 4px; gap: 6px; align-items: center; }
+  .game-heading .eyebrow, .game-subtitle { display: none; }
+  .game-heading h1 { font-size: 13px; line-height: 1.35; }
+  .game-heading-actions { width: auto; flex: 0 0 auto; display: flex; flex-wrap: nowrap; gap: 4px; }
+  .game-heading-actions .subtle-button { min-height: 25px; padding: 3px 7px; border-radius: 7px; font-size: 8px; white-space: nowrap; }
+
+  .stats-row { flex: 0 0 32px; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin: 0 0 4px; }
+  .stat-card { min-width: 0; min-height: 32px; height: 32px; padding: 3px 7px; flex-direction: row; justify-content: center; gap: 6px; border-radius: 8px; }
+  .stat-icon { width: 20px; height: 20px; border-radius: 6px; font-size: 11px; }
+  .stat-card div { min-width: 0; justify-items: start; gap: 0; }
+  .stat-card small { font-size: 7px; line-height: 1.2; white-space: nowrap; }
+  .stat-card strong { max-width: 100%; font-size: 10px; line-height: 1.2; white-space: nowrap; }
+
+  .turn-guide { flex: 0 0 34px; min-height: 34px; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: center; gap: 6px; margin: 0 0 5px; padding: 3px 7px; border-radius: 8px; }
+  .turn-guide-copy { min-width: 0; gap: 0; }
+  .turn-guide-kicker, .turn-guide-copy p { display: none; }
+  .turn-guide-copy strong { font-size: 9px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .turn-steps { gap: 3px; }
+  .turn-steps li { min-width: 0; justify-content: center; gap: 3px; padding: 2px 3px; border-radius: 6px; }
+  .turn-steps li > span { flex: 0 0 16px; width: 16px; height: 16px; border-radius: 5px; font-size: 7px; }
+  .turn-steps li small { font-size: 7px; }
+
+  .game-layout { flex: 1 1 auto; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, .82fr); grid-template-rows: minmax(0, 1fr); align-items: stretch; gap: 6px; overflow: hidden; }
+  .board-panel { width: auto; min-width: 0; min-height: 0; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; gap: 3px; padding: 6px; border-radius: 10px; overflow: hidden; }
+  .board-heading { min-height: 18px; margin: 0; gap: 5px; }
+  .board-heading h2 { margin: 0; font-size: 9px; }
+  .board-heading p { display: none; }
+  .live-indicator { padding: 2px 5px; gap: 3px; font-size: 7px; }
+  .live-indicator i { width: 4px; height: 4px; }
+  .board-frame { min-height: 0; height: 100%; display: flex; flex-direction: column; padding: 4px; border-radius: 8px; }
+  .board-sky { display: none; }
+  .board-grid { flex: 1 1 auto; min-height: 0; grid-template-columns: repeat(5, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) 14px minmax(0, 1fr); gap: 3px; }
+  .house { min-width: 0; min-height: 0; height: 100%; padding: 2px; gap: 1px; justify-content: center; border-radius: 6px; }
+  .house::before { width: 21px; height: 15px; top: 6px; left: calc(50% - 10.5px); }
+  .house::after { width: 6px; height: 8px; top: 21px; left: calc(50% - 3px); }
+  .house-number { top: 2px; right: 3px; width: 13px; height: 13px; border-radius: 4px; font-size: 7px; }
+  .house-name { font-size: 7px; line-height: 1.15; }
+  .pieces { min-height: 20px; gap: 2px; }
+  .piece { width: 19px; height: 19px; border-radius: 6px; font-size: 9px; }
+  .chance-badge { top: 2px; left: 2px; padding: 1px 3px; border-radius: 4px; font-size: 6px; }
+  .detective-target-badge { top: 2px; left: 2px; max-width: 55%; padding: 2px 3px; border-radius: 4px; font-size: 6px; }
+  .road-lane { min-height: 14px; grid-row: 2; font-size: 7px; letter-spacing: 0; }
+  .road-lane span { padding: 1px 5px; }
+  .street-eye-indicator { min-height: 18px; max-width: 42%; padding: 2px 4px; gap: 3px; font-size: 7px; }
+  .street-eye-symbol { flex-basis: 14px; width: 14px; height: 13px; }
+  .street-eye-symbol svg { width: 14px; height: 12px; }
+  .board-legend { flex-wrap: nowrap; justify-content: space-between; gap: 3px; padding: 2px 0 0; font-size: 6px; white-space: nowrap; }
+  .board-legend span { gap: 2px; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 4px; font-size: 6px; }
+  .board-note { min-height: 17px; max-height: 22px; margin: 0; padding: 2px 4px; border-radius: 5px; overflow: hidden; font-size: 7px; line-height: 1.35; }
+  .board-note::before { flex-basis: 11px; width: 11px; height: 11px; margin-left: 4px; font-size: 7px; }
+  .detective-preview { min-height: 22px; gap: 4px; margin-top: 0; padding: 3px 5px; border-radius: 6px; }
+  .detective-preview-icon { flex: 0 0 17px; width: 17px; height: 17px; font-size: 12px; }
+  .detective-preview-copy { min-width: 0; gap: 0; }
+  .detective-preview-copy strong { font-size: 7px; }
+  .detective-preview-copy small { font-size: 6px; }
+  .detective-preview-state { max-width: 54px; padding: 2px 3px; font-size: 6px; }
+
+  .control-column { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 5px; overflow: hidden; }
+  .control-panel, .probability-panel { width: auto; min-width: 0; min-height: 0; height: 100%; padding: 4px; border-radius: 9px; overflow: hidden; }
+  .control-panel { display: flex; flex-direction: column; }
+  .panel-heading { flex-wrap: nowrap; gap: 4px; margin: 0 0 4px; }
+  .panel-heading h2 { margin: 0; font-size: 9px; }
+  .panel-heading p { display: none; }
+  .step-number { width: 16px; height: 16px; border-radius: 5px; font-size: 8px; }
+  .character-select { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; }
+  .character-option { min-width: 0; min-height: 31px; padding: 2px; gap: 2px; border-radius: 6px; }
+  .character-avatar { flex: 0 0 19px; width: 19px; height: 19px; border-radius: 5px; font-size: 8px; }
+  .character-option > span:nth-child(2) { gap: 0; }
+  .character-option strong { font-size: 7px; line-height: 1.2; white-space: nowrap; }
+  .character-option small { font-size: 6px; line-height: 1.2; }
+  .selection-check { flex: 0 0 12px; width: 12px; height: 12px; font-size: 7px; }
+  .destination-instruction { display: none; }
+  .skip-button { min-height: 22px; margin-top: 3px; padding: 2px 5px; border-radius: 6px; font-size: 7px; }
+  .skip-button span { margin-right: 3px; font-size: 10px; }
+  .validation-message { min-height: 12px; max-height: 18px; margin: 2px 0 0; padding: 0; overflow: hidden; font-size: 6px; line-height: 1.4; }
+
+  .probability-panel { display: flex; flex-direction: column; }
+  .probability-panel .panel-heading { flex: 0 0 auto; margin-bottom: 2px; }
+  .probability-icon { width: 17px; height: 17px; border-radius: 5px; font-size: 12px; }
+  .probability-explainer, .probability-context { display: none; }
+  .probability-update-banner { flex: 0 0 auto; margin: 1px 0 3px; padding: 2px 4px; font-size: 6px; line-height: 1.3; }
+  .probability-details { min-height: 0; flex: 1 1 auto; overflow: hidden; padding: 0; border: 0; }
+  .probability-details summary { display: none; }
+  .probability-details .probability-list { display: grid; gap: 1px; padding: 0; }
+  .probability-item { min-height: 13px; grid-template-columns: 23px minmax(0, 1fr) 27px; gap: 4px; font-size: 7px; }
+  .probability-bar { height: 4px; }
+  .probability-percent { min-width: 26px; font-size: 7px; }
+  .probability-item.is-updating .probability-percent::after { display: none; }
+  .probability-removed-label { font-size: 6px; }
+  .eye-status { flex: 0 0 auto; min-height: 22px; margin-top: 3px; padding: 2px 4px; gap: 4px; border-radius: 5px; font-size: 6px; line-height: 1.25; }
+  .eye-status-icon { flex-basis: 15px; width: 15px; height: 15px; border-radius: 4px; font-size: 10px; }
+  .eye-status-copy { min-width: 0; gap: 0; }
+  .eye-status-copy strong { font-size: 6px; }
+  .eye-status-copy > span { font-size: 6px; line-height: 1.25; }
+  .eye-active-pill { padding: 1px 3px; font-size: 5px; }
+  .eye-chance-track { height: 3px; margin-top: 1px; }
+
+  .game-bottom-bar { flex: 0 0 17px; min-height: 17px; margin: 3px 0 0; padding: 0 2px; flex-direction: row; align-items: center; gap: 6px; font-size: 7px; line-height: 1; }
+  .game-bottom-bar > span { line-height: 1; }
+  .text-button { min-height: 16px; padding: 0; font-size: 7px; }
+  .modal-backdrop { padding: max(6px, env(safe-area-inset-top)) 8px max(6px, env(safe-area-inset-bottom)); }
+  .modal-card { max-height: 94dvh; padding: 15px; border-radius: 14px; }
+}
+
+@media (orientation: landscape) and (min-width: 520px) and (max-height: 420px) {
+  body.is-playing .topbar { height: 28px; min-height: 28px; flex-basis: 28px; }
+  body.is-playing .brand-logo { height: 27px; }
+  .game-heading { flex-basis: 22px; min-height: 22px; margin-bottom: 2px; }
+  .game-heading h1 { font-size: 11px; }
+  .game-heading-actions .subtle-button { min-height: 21px; padding: 2px 5px; font-size: 7px; }
+  .stats-row { flex-basis: 27px; margin-bottom: 3px; }
+  .stat-card { height: 27px; min-height: 27px; padding: 2px 5px; }
+  .stat-icon { width: 17px; height: 17px; font-size: 9px; }
+  .stat-card small { font-size: 6px; }
+  .stat-card strong { font-size: 8px; }
+  .turn-guide { flex-basis: 28px; min-height: 28px; margin-bottom: 3px; padding: 2px 5px; }
+  .turn-guide-copy strong { font-size: 8px; }
+  .turn-steps li small { font-size: 6px; }
+  .board-panel { padding: 4px; gap: 2px; }
+  .board-grid { grid-template-rows: minmax(0, 1fr) 11px minmax(0, 1fr); gap: 2px; }
+  .road-lane { min-height: 11px; }
+  .house::before { top: 4px; width: 17px; height: 12px; left: calc(50% - 8.5px); }
+  .house::after { top: 16px; width: 5px; height: 6px; left: calc(50% - 2.5px); }
+  .piece { width: 16px; height: 16px; font-size: 8px; }
+  .pieces { min-height: 17px; }
+  .house-name { font-size: 6px; }
+  .board-legend { font-size: 5px; }
+  .legend-dot { width: 10px; height: 10px; font-size: 5px; }
+  .board-note { min-height: 14px; max-height: 17px; font-size: 6px; }
+  .detective-preview { min-height: 18px; padding: 2px 4px; }
+  .detective-preview-icon { width: 14px; height: 14px; flex-basis: 14px; }
+  .detective-preview-copy strong { font-size: 6px; }
+  .detective-preview-copy small { font-size: 5px; }
+  .control-column { grid-template-rows: minmax(0, 1.1fr) minmax(0, .9fr); gap: 3px; }
+  .control-panel, .probability-panel { padding: 4px; }
+  .character-option { min-height: 34px; }
+  .character-avatar { flex-basis: 18px; width: 18px; height: 18px; }
+  .skip-button { min-height: 21px; margin-top: 2px; }
+  .validation-message { min-height: 10px; max-height: 12px; font-size: 5px; }
+  .probability-item { min-height: 9px; font-size: 6px; }
+  .eye-status { min-height: 16px; margin-top: 2px; padding: 1px 3px; }
+  .game-bottom-bar { flex-basis: 13px; min-height: 13px; margin-top: 2px; font-size: 6px; }
+  .text-button { min-height: 13px; font-size: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orientation-phone { animation: none !important; }
+}
