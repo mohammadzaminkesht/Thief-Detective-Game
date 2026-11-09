@@ -72,3 +72,30 @@ test('probability and detective reveal effects respect reduced-motion settings',
   assert.match(game, /const revealDelay = shouldReduceMotion/);
   assert.match(styles, /html\.reduce-motion-ui/);
 });
+
+
+test('mobile gameplay includes an accessible portrait-to-landscape prompt', () => {
+  assert.match(html, /id="orientationPrompt"[^>]*role="dialog"/);
+  assert.match(html, /id="orientationTitle">گوشی را افقی کن/);
+  assert.match(html, /id="orientationRetryBtn"/);
+});
+
+test('game screen toggles landscape mode and requests native orientation lock when available', () => {
+  assert.match(game, /classList\.toggle\('is-playing', name === 'game'\)/);
+  assert.match(game, /orientation\.lock\('landscape'\)/);
+  assert.match(game, /orientationRetryBtn/);
+});
+
+test('compact landscape layout fits the game without page scrolling', () => {
+  assert.match(styles, /orientation:\s*landscape/);
+  assert.match(styles, /max-height:\s*620px/);
+  assert.match(styles, /height:\s*100dvh/);
+  assert.match(styles, /overflow:\s*hidden/);
+});
+
+
+test('probability list reopens when a phone rotates into landscape', () => {
+  assert.match(game, /orientationchange/);
+  assert.match(game, /syncProbabilityDetailsForViewport/);
+  assert.match(game, /landscapeViewportQuery/);
+});
