@@ -74,25 +74,56 @@ test('probability and detective reveal effects respect reduced-motion settings',
 });
 
 
-test('mobile gameplay includes an accessible portrait-to-landscape prompt', () => {
-  assert.match(html, /id="orientationPrompt"[^>]*role="dialog"/);
-  assert.match(html, /id="orientationTitle">گوشی را افقی کن/);
-  assert.match(html, /id="orientationRetryBtn"/);
+test('mobile game no longer asks the player to rotate; it uses a landscape canvas fallback', () => {
+  assert.doesNotMatch(html, /orientationPrompt|orientationRetryBtn|گوشی را افقی کن/);
+  assert.match(game, /classList\.toggle\('is-mobile-game', mobileGame\)/);
+  assert.match(styles, /transform:\s*rotate\(90deg\)/);
+  assert.match(styles, /transform-origin:\s*top left/);
 });
 
-test('game screen toggles landscape mode and requests native orientation lock when available', () => {
-  assert.match(game, /classList\.toggle\('is-playing', name === 'game'\)/);
+test('mobile layout does not keep the previous portrait blocker or on-map probability badges', () => {
+  assert.doesNotMatch(styles, /body\.is-playing \.app-shell\s*\{\s*pointer-events:\s*none/);
+  assert.match(styles, /body\.is-mobile-game \.chance-badge\s*\{\s*display:\s*none !important/);
+  assert.match(styles, /body\.is-mobile-game \.probability-update-banner\s*\{\s*display:\s*none !important/);
+});
+
+test('mobile landscape mode begins on the first play tap, before first-run onboarding', () => {
+  const start = game.indexOf('function startGame()');
+  const onboarding = game.indexOf("readStorage(STORAGE_KEYS.onboarding)", start);
+  const orientation = game.indexOf('requestLandscapeOrientation()', start);
+  assert.ok(orientation >= 0 && orientation < onboarding);
+  assert.match(styles, /body\.is-mobile-game #onboardingModal/);
+});
+
+test('mobile game requests fullscreen and native landscape orientation when supported', () => {
+  assert.match(game, /requestFullscreen/);
   assert.match(game, /orientation\.lock\('landscape'\)/);
-  assert.match(game, /orientationRetryBtn/);
+  assert.match(game, /releaseLandscapeMode/);
+  assert.match(html, /manifest\.webmanifest/);
 });
 
-test('compact landscape layout fits the game without page scrolling', () => {
-  assert.match(styles, /orientation:\s*landscape/);
-  assert.match(styles, /max-height:\s*620px/);
-  assert.match(styles, /height:\s*100dvh/);
+test('mobile layout uses the exact requested 10 percent status and 85/15 map/control split', () => {
+  assert.match(styles, /flex:\s*0 0 10%/);
+  assert.match(styles, /grid-template-columns:\s*minmax\(0,\s*85fr\)\s+minmax\(0,\s*15fr\)/);
+  assert.match(styles, /grid-template-areas:\s*"map controls"/);
   assert.match(styles, /overflow:\s*hidden/);
 });
 
+test('mobile controls use letter-only pieces and text-only probability values', () => {
+  assert.match(styles, /character-option > span:nth-child\(2\)[\s\S]*?display:\s*none/);
+  assert.match(styles, /probability-bar[\s\S]*?display:\s*none/);
+  assert.match(styles, /probability-item[\s\S]*?grid-template-columns:\s*minmax\(0,\s*1fr\)\s+auto/);
+  assert.match(styles, /eye-chance-track[\s\S]*?display:\s*none/);
+  assert.match(game, /eye-mobile-summary/);
+});
+
+test('mobile app manifest requests landscape launch orientation', () => {
+  const manifest = JSON.parse(require('node:fs').readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
+  assert.equal(manifest.orientation, 'landscape');
+  assert.equal(manifest.display, 'fullscreen');
+  assert.ok(manifest.icons.some(icon => icon.sizes === '192x192'));
+  assert.ok(manifest.icons.some(icon => icon.sizes === '512x512'));
+});
 
 test('probability list reopens when a phone rotates into landscape', () => {
   assert.match(game, /orientationchange/);
