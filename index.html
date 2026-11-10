@@ -4,6 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#101b2b">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/app-icon-192.png">
   <title>Thief & Detective | بازی دزد و کارآگاه</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -152,12 +157,12 @@
             <section class="panel control-panel" aria-labelledby="movePanelTitle">
               <div class="panel-heading"><div><h2 id="movePanelTitle">انتخاب مهره</h2><p>یکی از مهره‌های فعال را برای حرکت انتخاب کن.</p></div><span class="step-number">۱</span></div>
               <div class="character-select" id="characterSelect">
-                <button class="character-option" data-character="T" id="selectT">
+                <button class="character-option" data-character="T" id="selectT" aria-label="انتخاب دزد اصلی، T">
                   <span class="character-avatar avatar-T">T</span>
                   <span><strong>دزد اصلی</strong><small>مهره T</small></span>
                   <i class="selection-check">✓</i>
                 </button>
-                <button class="character-option" data-character="t" id="selectt">
+                <button class="character-option" data-character="t" id="selectt" aria-label="انتخاب کمک‌دزد، t">
                   <span class="character-avatar avatar-t">t</span>
                   <span><strong>کمک‌دزد</strong><small>مهره t</small></span>
                   <i class="selection-check">✓</i>
@@ -262,16 +267,6 @@
     </div>
   </div>
 
-  <!-- Portrait guard: the play screen is designed for landscape phones. -->
-  <section id="orientationPrompt" class="orientation-prompt" role="dialog" aria-modal="true" aria-labelledby="orientationTitle" aria-describedby="orientationDescription">
-    <div class="orientation-card">
-      <div class="orientation-phone" aria-hidden="true"><span></span></div>
-      <p class="eyebrow">حالت مناسب بازی</p>
-      <h2 id="orientationTitle">گوشی را افقی کن</h2>
-      <p id="orientationDescription">برای دیدن نقشه، مهره‌ها، کنترل‌ها و احتمال‌ها در یک صفحه، گوشی را به حالت افقی بچرخان.</p>
-      <button class="primary-button" id="orientationRetryBtn" type="button">بررسی دوباره</button>
-    </div>
-  </section>
 
   <!-- Small information modal -->
   <div class="modal-backdrop hidden" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoTitle">

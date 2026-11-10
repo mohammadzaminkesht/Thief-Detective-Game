@@ -141,19 +141,40 @@ function toFaNumber(value) {
   return String(value).replace(/[0-9]/g, digit => '۰۱۲۳۴۵۶۷۸۹'[Number(digit)]);
 }
 
+function isCompactGameViewport() {
+  return window.matchMedia('(max-width: 1100px)').matches;
+}
+
+function releaseLandscapeMode() {
+  try {
+    window.screen?.orientation?.unlock?.();
+  } catch (error) {
+    // Unlocking is optional; navigation must never depend on it.
+  }
+  if (document.fullscreenElement && typeof document.exitFullscreen === 'function') {
+    const exitRequest = document.exitFullscreen();
+    if (exitRequest && typeof exitRequest.catch === 'function') exitRequest.catch(() => undefined);
+  }
+}
+
 function showScreen(name) {
   if (!screens[name]) return;
+  const leavingGame = state.screen === 'game' && name !== 'game';
 
   Object.entries(screens).forEach(([screenName, element]) => {
     element.classList.toggle('hidden', screenName !== name);
   });
 
   state.screen = name;
+  const mobileGame = name === 'game' && isCompactGameViewport();
   document.body.classList.toggle('is-playing', name === 'game');
-  window.scrollTo({ top: 0, behavior: state.reduceMotion ? 'auto' : 'smooth' });
+  document.body.classList.toggle('is-mobile-game', mobileGame);
+  if (leavingGame) releaseLandscapeMode();
+  window.scrollTo({ top: 0, behavior: state.reduceMotion ? 'auto' : 'instant' });
 
   if (name === 'game') {
-    window.setTimeout(() => $('#quitGameBtn')?.focus({ preventScroll: true }), 0);
+    syncProbabilityDetailsForViewport();
+    window.setTimeout(() => (mobileGame ? $('#selectT') : $('#quitGameBtn'))?.focus({ preventScroll: true }), 0);
   }
 }
 
@@ -781,7 +802,7 @@ function renderEyeStatus() {
     element.classList.add('active');
     element.innerHTML = `
       <span class="eye-status-icon" aria-hidden="true">◉</span>
-      <span class="eye-status-copy"><strong>چشم فعال است</strong><span>${state.eyeEffectMessage || `خانه‌های ${parityText} زیر نظر هستند. پس از انتخاب مقصد، احتمال‌های کارآگاه براساس حرکت تو اصلاح می‌شوند.`}</span></span>
+      <span class="eye-status-copy"><strong>چشم فعال است</strong><span class="eye-desktop-detail">${state.eyeEffectMessage || `خانه‌های ${parityText} زیر نظر هستند. پس از انتخاب مقصد، احتمال‌های کارآگاه براساس حرکت تو اصلاح می‌شوند.`}</span><span class="eye-mobile-summary">رصد خانه‌های ${parityText}</span></span>
       <span class="eye-active-pill">فعال</span>
     `;
     return;
@@ -791,7 +812,7 @@ function renderEyeStatus() {
   const chance = Math.min(100, state.eyeProbability);
   element.innerHTML = `
     <span class="eye-status-icon" aria-hidden="true">◉</span>
-    <span class="eye-status-copy"><strong>چشم فعلاً دیده نمی‌شود</strong><span>شانس ظاهرشدن در نوبت بعد: ${toFaNumber(chance)}٪</span><span class="eye-chance-track" role="meter" aria-label="شانس ظاهرشدن چشم در نوبت بعد" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${chance}"><i style="width:${chance}%"></i></span></span>
+    <span class="eye-status-copy"><strong>چشم</strong><span class="eye-desktop-detail">شانس ظاهرشدن در نوبت بعد: ${toFaNumber(chance)}٪</span><span class="eye-mobile-summary">${toFaNumber(chance)}٪ احتمال حضور</span><span class="eye-chance-track" role="meter" aria-label="شانس ظاهرشدن چشم در نوبت بعد" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${chance}"><i style="width:${chance}%"></i></span></span>
   `;
 }
 
@@ -902,22 +923,39 @@ function finishOnboarding() {
 }
 
 function requestLandscapeOrientation() {
-  const compactDevice = window.matchMedia('(max-width: 900px)').matches;
-  const orientation = window.screen?.orientation;
-  if (!compactDevice || !orientation || typeof orientation.lock !== 'function') return;
+  if (!isCompactGameViewport()) return;
 
-  // Orientation locking is supported only by some mobile browsers and may
-  // require fullscreen. The on-screen rotate prompt remains the fallback.
-  try {
-    const lockRequest = orientation.lock('landscape');
-    if (lockRequest && typeof lockRequest.catch === 'function') lockRequest.catch(() => undefined);
-  } catch (error) {
-    // A denied/unsupported lock must never block starting the game.
+  const orientation = window.screen?.orientation;
+  const lockLandscape = () => {
+    if (!orientation || typeof orientation.lock !== 'function') return;
+    try {
+      const lockRequest = orientation.lock('landscape');
+      if (lockRequest && typeof lockRequest.catch === 'function') lockRequest.catch(() => undefined);
+    } catch (error) {
+      // CSS rotates the game surface when native orientation locking is unavailable.
+    }
+  };
+
+  // On mobile browsers the native orientation lock is commonly allowed only
+  // after entering fullscreen from a user gesture. Fall back to CSS rotation
+  // when fullscreen or orientation locking is unavailable.
+  if (!document.fullscreenElement && typeof document.documentElement.requestFullscreen === 'function') {
+    try {
+      const fullscreenRequest = document.documentElement.requestFullscreen({ navigationUI: 'hide' });
+      if (fullscreenRequest && typeof fullscreenRequest.then === 'function') {
+        fullscreenRequest.then(lockLandscape).catch(lockLandscape);
+      } else {
+        lockLandscape();
+      }
+    } catch (error) {
+      lockLandscape();
+    }
+  } else {
+    lockLandscape();
   }
 }
 
 function beginGameNow() {
-  requestLandscapeOrientation();
   state.score = 0;
   state.statusT = 0;
   state.statusSmallT = 0;
@@ -948,6 +986,11 @@ function beginGameNow() {
 
 function startGame() {
   if (state.busy && !state.gameEnded) return;
+  if (isCompactGameViewport()) {
+    // Start the landscape experience on the first tap, including first-run onboarding.
+    document.body.classList.add('is-mobile-game');
+    requestLandscapeOrientation();
+  }
   if (readStorage(STORAGE_KEYS.onboarding) !== 'true') {
     showOnboarding();
     return;
@@ -1272,7 +1315,6 @@ function clearAllRecords() {
 
 // Navigation and buttons
 $('#startGameBtn').addEventListener('click', startGame);
-$('#orientationRetryBtn')?.addEventListener('click', requestLandscapeOrientation);
 $('#tipsBtn').addEventListener('click', () => openTips('menu'));
 $('#gameTipsBtn').addEventListener('click', () => openTips('game'));
 $('#recordsBtn').addEventListener('click', () => {
@@ -1442,11 +1484,11 @@ state.stats = getGameStats();
 applySettingsToUI();
 const probabilityDetails = $('#probabilityDetails');
 function syncProbabilityDetailsForViewport() {
-  const compactLandscape = window.matchMedia('(orientation: landscape) and (max-height: 620px)').matches;
+  const compactLandscape = document.body.classList.contains('is-mobile-game') || window.matchMedia('(orientation: landscape) and (max-height: 620px)').matches;
   if (probabilityDetails && compactLandscape) probabilityDetails.open = true;
 }
 if (probabilityDetails) {
-  const compactLandscape = window.matchMedia('(orientation: landscape) and (max-height: 620px)').matches;
+  const compactLandscape = document.body.classList.contains('is-mobile-game') || window.matchMedia('(orientation: landscape) and (max-height: 620px)').matches;
   probabilityDetails.open = compactLandscape || !window.matchMedia('(max-width: 640px)').matches;
 }
 window.addEventListener('orientationchange', () => window.setTimeout(syncProbabilityDetailsForViewport, 80), { passive: true });

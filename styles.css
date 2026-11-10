@@ -1512,78 +1512,8 @@ html.reduce-motion-ui .probability-update-banner.is-no-motion {
 }
 
 
-/* =========================================================
-   Mobile landscape play mode
-   - Ask phone users to rotate before entering the board.
-   - Keep the complete game UI inside one landscape viewport.
-   ========================================================= */
-.orientation-prompt {
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 11000;
-  place-items: center;
-  padding: max(18px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left));
-  background: radial-gradient(circle at 50% 25%, rgba(62, 111, 136, .22), transparent 48%), rgba(7, 15, 27, .97);
-  text-align: center;
-}
-.orientation-card {
-  width: min(360px, 100%);
-  display: grid;
-  justify-items: center;
-  gap: 9px;
-  padding: 25px 22px;
-  border: 1px solid rgba(153, 190, 212, .16);
-  border-radius: 22px;
-  background: linear-gradient(145deg, rgba(27, 48, 72, .98), rgba(15, 29, 47, .98));
-  box-shadow: var(--shadow);
-}
-.orientation-card .eyebrow { margin: 7px 0 0; }
-.orientation-card h2 { margin: 0; font-size: 20px; }
-.orientation-card p:not(.eyebrow) { margin: 0 0 8px; color: #a9bbcd; font-size: 11px; line-height: 2; }
-.orientation-card .primary-button { min-height: 42px; padding-inline: 24px; }
-.orientation-phone {
-  position: relative;
-  width: 76px;
-  height: 112px;
-  display: grid;
-  place-items: center;
-  border: 4px solid #8fa7bd;
-  border-radius: 15px;
-  background: linear-gradient(145deg, #213b55, #102033);
-  box-shadow: 0 0 0 7px rgba(112, 169, 255, .07);
-  animation: phone-rotate-hint 2.2s ease-in-out infinite;
-}
-.orientation-phone::before {
-  content: '';
-  width: 36px;
-  height: 65px;
-  border: 1px solid rgba(169, 199, 219, .4);
-  border-radius: 5px;
-  background: linear-gradient(160deg, rgba(78, 208, 181, .22), rgba(112, 169, 255, .12));
-}
-.orientation-phone span {
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  margin-top: 92px;
-  border-radius: 50%;
-  background: #8fa7bd;
-}
-@keyframes phone-rotate-hint {
-  0%, 18%, 100% { transform: rotate(0deg); }
-  42%, 75% { transform: rotate(90deg); }
-}
-
-@media (max-width: 900px) and (orientation: portrait) {
-  body.is-playing { overflow: hidden; }
-  body.is-playing #orientationPrompt { display: grid; }
-  body.is-playing .app-shell { pointer-events: none; filter: blur(2px); }
-}
-
 @media (orientation: landscape) and (min-width: 520px) and (max-height: 620px) {
   body.is-playing { width: 100%; height: 100dvh; min-width: 0; min-height: 100dvh; overflow: hidden; padding: 0; }
-  body.is-playing #orientationPrompt { display: none; }
 
   body.is-playing .app-shell {
     width: 100%; max-width: none; height: 100dvh; min-height: 0; margin: 0;
@@ -1750,4 +1680,576 @@ html.reduce-motion-ui .probability-update-banner.is-no-motion {
 
 @media (prefers-reduced-motion: reduce) {
   .orientation-phone { animation: none !important; }
+}
+
+
+.eye-mobile-summary { display: none; }
+
+/* =========================================================
+   Exact mobile game composition requested by the player
+   10% top status strip / 90% play area / 15% right rail / 85% map
+   ========================================================= */
+body.is-mobile-game {
+  width: 100vw;
+  height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+body.is-mobile-game .app-shell {
+  position: fixed;
+  inset: 0 auto auto 0;
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100dvh;
+  max-width: none;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  overflow: hidden;
+  transform: none;
+  animation: none;
+}
+
+body.is-mobile-game .topbar,
+body.is-mobile-game .footer {
+  display: none !important;
+}
+
+body.is-mobile-game main {
+  display: block;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+body.is-mobile-game #gameScreen:not(.hidden) {
+  display: flex !important;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: 100%;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  animation: none;
+}
+
+/* Only the three requested values remain in the full-width top 10%. */
+body.is-mobile-game .game-heading,
+body.is-mobile-game .turn-guide,
+body.is-mobile-game .game-bottom-bar {
+  display: none !important;
+}
+
+body.is-mobile-game .stats-row {
+  display: grid;
+  flex: 0 0 10%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  height: 10%;
+  min-height: 0;
+  max-height: 10%;
+  gap: clamp(3px, .7vw, 8px);
+  margin: 0;
+  padding: clamp(2px, .45vh, 5px) clamp(3px, .7vw, 8px);
+  direction: rtl;
+}
+
+body.is-mobile-game .stat-card {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  gap: clamp(3px, .7vw, 8px);
+  padding: 2px clamp(3px, .65vw, 8px);
+  border-radius: clamp(6px, 1.2vh, 11px);
+  overflow: hidden;
+}
+
+body.is-mobile-game .stat-icon {
+  flex: 0 0 auto;
+  width: clamp(15px, 3.2vh, 25px);
+  height: clamp(15px, 3.2vh, 25px);
+  border-radius: 5px;
+  font-size: clamp(9px, 1.7vh, 13px);
+}
+
+body.is-mobile-game .stat-card div {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 0;
+}
+
+body.is-mobile-game .stat-card small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: clamp(7px, 1.25vh, 10px);
+  line-height: 1.25;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body.is-mobile-game .stat-card strong {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(9px, 1.7vh, 13px);
+  line-height: 1.3;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* The remaining 90% is an exact 85/15 split: map on the left, controls on the right. */
+body.is-mobile-game .game-layout {
+  display: grid;
+  flex: 1 1 90%;
+  grid-template-columns: minmax(0, 85fr) minmax(0, 15fr);
+  grid-template-rows: minmax(0, 1fr);
+  grid-template-areas: "map controls";
+  width: 100%;
+  height: 90%;
+  min-width: 0;
+  min-height: 0;
+  gap: clamp(3px, .65vw, 7px);
+  margin: 0;
+  padding: 0 clamp(3px, .6vw, 7px) max(2px, env(safe-area-inset-bottom, 0px));
+  direction: ltr;
+  align-items: stretch;
+  overflow: hidden;
+}
+
+body.is-mobile-game .board-panel {
+  grid-area: map;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(2px, .55vw, 7px);
+  border-radius: clamp(6px, 1.2vh, 11px);
+  overflow: hidden;
+}
+
+body.is-mobile-game .board-panel > .panel-heading,
+body.is-mobile-game .board-sky,
+body.is-mobile-game .board-legend,
+body.is-mobile-game .board-note,
+body.is-mobile-game .detective-preview {
+  display: none !important;
+}
+
+body.is-mobile-game .board-frame {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(2px, .55vw, 7px);
+  border-radius: clamp(5px, .9vh, 9px);
+  overflow: hidden;
+}
+
+body.is-mobile-game .board-grid {
+  display: grid;
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: minmax(0, 1fr) clamp(15px, 7.5%, 28px) minmax(0, 1fr);
+  grid-auto-flow: row;
+  gap: clamp(2px, .55vw, 7px);
+  direction: ltr;
+}
+
+body.is-mobile-game .house {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  padding: clamp(2px, .45vh, 5px);
+  gap: clamp(1px, .3vh, 3px);
+  justify-content: center;
+  border-radius: clamp(5px, .9vh, 9px);
+  overflow: hidden;
+}
+
+body.is-mobile-game .house-name {
+  display: none !important;
+}
+
+body.is-mobile-game .house-number {
+  top: 2px;
+  right: 3px;
+  width: clamp(12px, 2.1vh, 18px);
+  height: clamp(12px, 2.1vh, 18px);
+  border-radius: 4px;
+  font-size: clamp(7px, 1.15vh, 9px);
+}
+
+body.is-mobile-game .house::before {
+  top: 16%;
+  left: 50%;
+  width: clamp(16px, 3.3vw, 34px);
+  height: clamp(12px, 3.2vh, 24px);
+  transform: translateX(-50%);
+}
+
+body.is-mobile-game .house::after {
+  top: 43%;
+  left: 50%;
+  width: clamp(5px, .8vw, 9px);
+  height: clamp(7px, 1.8vh, 13px);
+  transform: translateX(-50%);
+}
+
+body.is-mobile-game .pieces {
+  display: flex;
+  min-height: 0;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
+body.is-mobile-game .piece {
+  width: clamp(15px, 3.4vh, 27px);
+  height: clamp(15px, 3.4vh, 27px);
+  border-radius: clamp(4px, .7vh, 7px);
+  font-size: clamp(8px, 1.65vh, 12px);
+}
+
+body.is-mobile-game .chance-badge {
+  display: none !important;
+  top: 2px;
+  left: 2px;
+  padding: 1px 3px;
+  border-radius: 4px;
+  font-size: clamp(6px, 1vh, 8px);
+}
+
+body.is-mobile-game .detective-target-badge {
+  top: 2px;
+  left: 50%;
+  max-width: 70%;
+  padding: 2px 3px;
+  border-radius: 4px;
+  font-size: clamp(5px, .95vh, 7px);
+  transform: translateX(-50%);
+}
+
+body.is-mobile-game .road-lane {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  min-width: 0;
+  min-height: 0;
+  font-size: clamp(6px, 1vh, 8px);
+  letter-spacing: 0;
+}
+
+body.is-mobile-game .road-lane span {
+  padding: 1px clamp(5px, 1vw, 11px);
+}
+
+body.is-mobile-game .street-eye-indicator {
+  top: 50%;
+  max-width: 38%;
+  min-height: clamp(15px, 4vh, 23px);
+  padding: 2px clamp(3px, .55vw, 6px);
+  gap: 3px;
+  font-size: clamp(6px, 1.05vh, 8px);
+}
+
+body.is-mobile-game .street-eye-indicator.parity-even { right: 2px; }
+body.is-mobile-game .street-eye-indicator.parity-odd { left: 2px; }
+body.is-mobile-game .street-eye-symbol,
+body.is-mobile-game .street-eye-symbol svg {
+  flex-basis: 13px;
+  width: 13px;
+  height: 12px;
+}
+
+/* 15% right control rail: letter-only thief buttons, numeric house odds, eye chance. */
+body.is-mobile-game .control-column {
+  grid-area: controls;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  gap: clamp(3px, .65vh, 6px);
+  overflow: hidden;
+  direction: rtl;
+}
+
+body.is-mobile-game .control-panel,
+body.is-mobile-game .probability-panel {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: clamp(3px, .55vw, 6px);
+  border-radius: clamp(5px, .9vh, 9px);
+  overflow: hidden;
+}
+
+body.is-mobile-game .control-panel .panel-heading,
+body.is-mobile-game .probability-panel .panel-heading {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  margin: 0 0 clamp(2px, .5vh, 5px);
+  padding: 0;
+  gap: 2px;
+}
+
+body.is-mobile-game .control-panel .panel-heading h2,
+body.is-mobile-game .probability-panel .panel-heading h2 {
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  font-size: clamp(7px, 1.25vh, 9px);
+  line-height: 1.4;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body.is-mobile-game .control-panel .panel-heading p,
+body.is-mobile-game .probability-panel .panel-heading p,
+body.is-mobile-game .control-panel .step-number,
+body.is-mobile-game .control-panel .destination-instruction,
+body.is-mobile-game .control-panel .skip-button,
+body.is-mobile-game .control-panel .validation-message,
+body.is-mobile-game .probability-panel .probability-icon,
+body.is-mobile-game .probability-panel .probability-explainer,
+body.is-mobile-game .probability-panel .probability-context,
+body.is-mobile-game .probability-details summary {
+  display: none !important;
+}
+
+body.is-mobile-game .character-select {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: 100%;
+  gap: clamp(2px, .45vw, 5px);
+}
+
+body.is-mobile-game .character-option {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 0;
+  min-height: clamp(29px, 7vh, 43px);
+  height: clamp(29px, 7vh, 43px);
+  padding: 2px;
+  border-radius: 6px;
+}
+
+body.is-mobile-game .character-option > span:nth-child(2),
+body.is-mobile-game .character-option .selection-check {
+  display: none !important;
+}
+
+body.is-mobile-game .character-avatar {
+  display: grid;
+  place-items: center;
+  width: clamp(20px, 4vh, 29px);
+  height: clamp(20px, 4vh, 29px);
+  border-radius: 5px;
+  font-size: clamp(11px, 2vh, 15px);
+}
+
+body.is-mobile-game .probability-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+body.is-mobile-game .probability-details {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+
+body.is-mobile-game .probability-list {
+  display: grid;
+  gap: clamp(2px, .55vh, 5px);
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+
+body.is-mobile-game .probability-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-width: 0;
+  min-height: clamp(15px, 4.2vh, 22px);
+  gap: 3px;
+  padding: 1px 2px;
+  border-radius: 4px;
+  font-size: clamp(7px, 1.2vh, 9px);
+}
+
+body.is-mobile-game .probability-house {
+  min-width: 0;
+  overflow: hidden;
+  direction: rtl;
+  font-size: inherit;
+  white-space: nowrap;
+}
+
+body.is-mobile-game .probability-bar {
+  display: none !important;
+}
+
+body.is-mobile-game .probability-percent {
+  min-width: 0;
+  text-align: left;
+  font-size: clamp(7px, 1.2vh, 9px);
+  white-space: nowrap;
+}
+
+body.is-mobile-game .probability-removed-label {
+  grid-column: 1 / -1;
+  font-size: clamp(6px, 1vh, 8px);
+}
+
+body.is-mobile-game .probability-update-banner {
+  display: none !important;
+  flex: 0 0 auto;
+  margin: 1px 0 3px;
+  padding: 2px 3px;
+  font-size: clamp(6px, .95vh, 8px);
+  line-height: 1.35;
+}
+
+body.is-mobile-game .eye-status {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  min-width: 0;
+  min-height: clamp(25px, 7vh, 38px);
+  margin-top: clamp(3px, .65vh, 6px);
+  padding: 2px 3px;
+  gap: 3px;
+  border-radius: 5px;
+  font-size: clamp(6px, 1vh, 8px);
+  line-height: 1.25;
+}
+
+body.is-mobile-game .eye-status-icon {
+  flex: 0 0 clamp(13px, 2.8vh, 19px);
+  width: clamp(13px, 2.8vh, 19px);
+  height: clamp(13px, 2.8vh, 19px);
+  border-radius: 4px;
+  font-size: clamp(8px, 1.5vh, 11px);
+}
+
+body.is-mobile-game .eye-status-copy {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+}
+
+body.is-mobile-game .eye-status-copy strong {
+  overflow: hidden;
+  font-size: clamp(6px, 1vh, 8px);
+  line-height: 1.2;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body.is-mobile-game .eye-status-copy .eye-desktop-detail,
+body.is-mobile-game .eye-chance-track {
+  display: none !important;
+}
+
+body.is-mobile-game .eye-status-copy .eye-mobile-summary {
+  display: block;
+  overflow: hidden;
+  font-size: clamp(6px, .95vh, 8px);
+  line-height: 1.25;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+body.is-mobile-game .eye-active-pill {
+  flex: 0 0 auto;
+  padding: 1px 3px;
+  font-size: 6px;
+}
+
+/* Browser fallback: render the same landscape canvas sideways on portrait phones.
+   The player can turn the device; no rotate-phone prompt is shown. */
+@media (max-width: 1100px) and (orientation: portrait) {
+  body.is-mobile-game .app-shell {
+    inset: 0 auto auto 100vw;
+    width: 100dvh;
+    height: 100vw;
+    transform: rotate(90deg);
+    transform-origin: top left;
+  }
+
+  body.is-mobile-game #onboardingModal,
+  body.is-mobile-game #gameOverModal,
+  body.is-mobile-game #infoModal {
+    position: fixed;
+    inset: 0 auto auto 100vw;
+    width: 100dvh;
+    height: 100vw;
+    max-height: none;
+    padding: clamp(6px, 2vh, 18px);
+    transform: rotate(90deg);
+    transform-origin: top left;
+    overflow: auto;
+  }
+}
+
+@media (max-width: 1100px) and (orientation: landscape) {
+  body.is-mobile-game .app-shell {
+    inset: 0 auto auto 0;
+    width: 100vw;
+    height: 100dvh;
+    transform: none;
+  }
+}
+
+@media (max-height: 340px) {
+  body.is-mobile-game .stats-row { min-height: 29px; }
+  body.is-mobile-game .character-option { min-height: 26px; height: 26px; }
+  body.is-mobile-game .eye-status { min-height: 22px; }
+  body.is-mobile-game .control-column { gap: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.is-mobile-game .house.detective-target,
+  body.is-mobile-game .street-eye-indicator {
+    animation: none !important;
+  }
 }

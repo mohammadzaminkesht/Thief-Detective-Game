@@ -1,0 +1,28 @@
+{
+  "id": "./",
+  "name": "Thief & Detective",
+  "short_name": "Thief & Detective",
+  "description": "بازی استراتژیک دزد و کارآگاه",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0c1523",
+  "theme_color": "#101b2b",
+  "icons": [
+    {
+      "src": "assets/app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
